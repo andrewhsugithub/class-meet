@@ -13,5 +13,5 @@ export type SocketIOResponse = NextApiResponse & {
 type MessageType = {
   content: string;
   author: string;
-  timestamp: string;
+  timestamp: number;
 };

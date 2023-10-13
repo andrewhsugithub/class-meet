@@ -1,11 +1,19 @@
-﻿import { useState } from "react";
+﻿import { useRoomContext } from "@/context/RoomProvider";
+import { useState } from "react";
 
 const ChatInput = () => {
   const [message, setMessage] = useState("");
+  const { sendMessage } = useRoomContext();
 
   return (
     <div>
-      <form action="">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage(message);
+          setMessage("");
+        }}
+      >
         <textarea
           className="border rounded"
           onChange={(e) => {

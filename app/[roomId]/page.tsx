@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import ChatButton from "@/components/ChatButton";
+import Name from "@/components/Name";
 import ShareScreen from "@/components/ShareScreen";
 import VideoPlayer from "@/components/VideoPlayer";
 import Chat from "@/components/chat/Chat";
+import { Button } from "@/components/ui/button";
 import { useRoomContext } from "@/context/RoomProvider";
 import { PeerState } from "@/hooks/usePeer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Page = ({ params }: { params: { roomId: string } }) => {
   const roomId = params.roomId;
@@ -18,6 +19,9 @@ const Page = ({ params }: { params: { roomId: string } }) => {
     shareScreen,
     setRoomId,
     screenSharingId,
+    toggleChat,
+    chat,
+    username,
   } = useRoomContext();
 
   useEffect(() => {
@@ -25,11 +29,11 @@ const Page = ({ params }: { params: { roomId: string } }) => {
   }, [roomId, setRoomId]);
 
   useEffect(() => {
-    if (peer) {
-      console.log("emit join room event");
-      socket.emit("join-room", { roomId, peerId: peer?.id });
+    if (peer && stream) {
+      console.log("emit join room event", peer);
+      socket.emit("join-room", { roomId, peerId: peer?.id, username });
     }
-  }, [roomId, socket, peer]);
+  }, [roomId, socket, peer, stream]);
 
   const screenSharingVid =
     screenSharingId === peer?.id ? stream : peers[screenSharingId]?.stream;
@@ -54,22 +58,28 @@ const Page = ({ params }: { params: { roomId: string } }) => {
           }`}
         >
           {stream && screenSharingId !== peer?.id && (
-            <VideoPlayer stream={stream} />
+            <>
+              <VideoPlayer stream={stream} />
+              <p>{username}</p>
+            </>
           )}
           {Object.values(otherPeers as PeerState).map((peer) => {
             return (
-              <div key={peer.stream.id}>
+              <div key={peer.stream?.id}>
                 {peer.stream && <VideoPlayer stream={peer.stream} />}
+                <p>{peer.username}</p>
               </div>
             );
           })}
         </div>
-        <div className="border-l-2">
-          <Chat />
-        </div>
+        {chat.isChatOpen && (
+          <div className="border-l-2">
+            <Chat />
+          </div>
+        )}
       </div>
       <div>
-        <ChatButton />
+        <Button onClick={() => toggleChat(chat.isChatOpen)}>Chat Bubble</Button>
         <ShareScreen handleShare={shareScreen} />
       </div>
     </>
